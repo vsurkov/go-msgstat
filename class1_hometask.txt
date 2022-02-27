@@ -1,0 +1,96 @@
+Практические задания
+1. Развернуть сервер PostgreSQL в Docker.
+
+а) создаем описание: vim docker-compose.yml 
+version: '3.8'
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local
+
+б) запускаем: docker-compose up -d
+
+2. Создать пользователя и базу данных.
+а) Под macos первоначально необходимо установить клиента psql и другие тулзы:
+	brew install libpq
+	ln -s /usr/local/Cellar/libpq/14.2/bin/psql /usr/local/bin/psql
+	psql --version                                                 
+Если получаем корректный ответ то все ОК. Получаем: psql (PostgreSQL) 14.2
+
+б) подключаемся 
+	psql -U postgres -h 192.168.88.10 -p 5432
+
+в) создаем пользователя: 
+	postgres=# CREATE USER msguser
+	postgres-# WITH PASSWORD 'test';
+	CREATE ROLE
+
+г) создаем базу:
+	postgres=# CREATE DATABASE msgstat
+	postgres-# TEMPLATE = 'template0'
+	postgres-# ENCODING = 'utf-8'
+	postgres-# LC_COLLATE = 'C.UTF-8'
+	postgres-# LC_CTYPE = 'C.UTF-8';
+	CREATE DATABASE
+
+д) отзываем права: 
+	msgstat=# REVOKE ALL ON DATABASE msgstat FROM PUBLIC;
+	REVOKE
+
+е) выдадим права нашему пользователю:
+	msgstat=# ALTER DATABASE msgstat OWNER TO msguser;
+	ALTER DATABASE
+
+3. В базе из пункта 2 создать таблицу: не менее трёх столбцов различных типов. SQL-запрос на создание таблицы добавить в текстовый файл class1_hometask.txt.
+	DROP TABLE IF EXISTS cources;
+
+	CREATE TABLE cources (
+	id INT GENERATED ALWAYS AS IDENTITY,
+	title VARCHAR(200),
+	start_date DATE);
+
+
+4. В таблицу из пункта 3 вставить не менее трёх строк. SQL-запрос на вставку добавить в текстовый файл class1_hometask.txt.
+	INSERT INTO cources(title, start_date)
+	VALUES ('gitlab базовый', '2022-03-05'), ('gitlab продвинутый', '2022-04-01'),('GO продвинутый', '2022-03-15');
+
+5. Используя мета-команды psql, вывести список всех сущностей в базе данных из пункта 2. Полученный список сущностей добавить в текстовый файл 
+class1_hometask.txt.
+
+список таблиц (tables), представлений (views) и последовательностей (sequences):
+	msgstat=> \d
+	              List of relations
+	 Schema |      Name      |   Type   |  Owner  
+	--------+----------------+----------+---------
+	 public | cources        | table    | msguser
+	 public | cources_id_seq | sequence | msguser
+	(2 rows)
+
+содержимое таблицы cources:
+	msgstat=> SELECT * FROM cources;
+	 id |       title        | start_date 
+	----+--------------------+------------
+	  1 | gitlab базовый     | 2022-03-05
+	  2 | gitlab продвинутый | 2022-04-01
+	  3 | GO продвинутый     | 2022-03-15
+	(3 rows)
+
+
+6. Придумать проект, над которым вы будете работать в последующих уроках. Примером может быть любой сайт/приложение, которым вы пользуетесь (YouTube, Medium, AirBnB, Booking, Twitter, Instagram, Facebook, LinkedIn). Это может быть соц. сеть, блог, книга рецептов, база данных авиаперелетов, мессенджер, система бронирования бань и саун и т.п.
+	Придумал.
+
+7. Кратко (не более 10 предложений) описать суть проекта и основной use-case в файле schema.sql (описывать как sql комментарий в начале файла).
+	Описал, см. schema.sql
+
+8. Разработать структуру базы данных, которая будет фундаментом для выбранного проекта (не менее трёх таблиц, не более 10 таблиц). В структуре базы данных желательно иметь логические связи между сущностями (не менее одной связи). Команды на создание таблиц описать в файле schema.sql.
+	Описал, см. schema.sql
